@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from pkg_resources import resource_filename as rf
 
-from conf_reader.reader import ConfReader
+from conf_reader import ConfReader
 from tests import ReaderTestCase
 
 
@@ -68,7 +68,7 @@ class ReadeActionsTC(ReaderTestCase):
         self.assertTrue(isinstance(section_2.get('config_6'), dict))
         self.assertTrue(isinstance(section_2.get('config_5'), list))
 
-    @patch('conf_reader.reader.os.path.getmtime')
+    @patch('conf_reader.os.path.getmtime')
     def test_file_reload(self, get_time):
         """
         Validates if the reload is successfully done.
@@ -83,7 +83,7 @@ class ReadeActionsTC(ReaderTestCase):
 
         self.assertEqual(ConfReader.get('SECTION_1', 'config_4'), 15)
 
-    @patch('conf_reader.reader.os.path.getmtime')
+    @patch('conf_reader.os.path.getmtime')
     def test_reload_parameter(self, get_time):
         """
         Validates the force_reload option when the RELOAD is False.
@@ -109,7 +109,7 @@ class ReadeActionsTC(ReaderTestCase):
         ConfReader.RELOAD = False
         self.assertEqual(ConfReader.get('SECTION_1', 'config_4'), 10.5)
 
-    @patch('conf_reader.reader.os.path.getmtime')
+    @patch('conf_reader.os.path.getmtime')
     def test_unmodified_change_date_dont_reload(self, get_time=None):
         """
         Validates if the configuration remain after an unsuccessfully force reload operation.

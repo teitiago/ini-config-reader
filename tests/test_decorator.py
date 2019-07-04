@@ -2,7 +2,7 @@ import unittest
 
 from pkg_resources import resource_filename as rf
 
-from conf_reader.reader import read_conf, ConfReader
+from conf_reader import read_conf, ConfReader
 from tests import ReaderTestCase
 
 
