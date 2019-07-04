@@ -29,7 +29,7 @@ def reload(_function_):
         if (ConfReader.RELOAD or kwargs.get('force_reload', False)) and os.path.getmtime(
                 ConfReader.INI_FILE) > ConfReader.__INI_FILE_TIME__:
             ConfReader().__initialize_dict_cache__()
-            ConfReader().read_conf_file()
+            ConfReader().change_config_file()
             logger.debug('Config reader reloaded')
         return _function_(*args, **kwargs)
 
@@ -75,14 +75,14 @@ class ConfReader(metaclass=Singleton):
     INI_FILE = None
     __INI_FILE_TIME__ = None
 
-    # Variable that forces to reload the INI file everytime a configuration is loaded
+    # Variable that forces to reload the INI file every time a configuration is loaded
     RELOAD = True
 
     # Stores the dictionary reading in a dictionary {SECTION: {CONFIGURATIONS}}
     # This avoids processing the section more then once
     DICT_CACHE = False
 
-    def __init__(self, ini_file):
+    def __init__(self, ini_file=None):
         """
         Loads the ConfReader. It uses a os.environ to allow ENV variables reading,
         as the format '%()'.
@@ -91,21 +91,23 @@ class ConfReader(metaclass=Singleton):
         """
         logger.debug('Config reader initialization')
 
-        ConfReader.INI_FILE = ini_file
-
         self.config = configparser.ConfigParser(os.environ, allow_no_value=True)
+        self.config_dict = configparser.ConfigParser(allow_no_value=True)  # config dict allows to read all sections
 
-        self.read_conf_file()
+        self.change_config_file(ini_file)
 
         self.__initialize_dict_cache__()
 
         logger.info('Config reader successfully initialized with {}'.format(ConfReader.INI_FILE))
 
-    def change_config_file(self, ini_file):
-        ConfReader.INI_FILE = ini_file
-        self.read_conf_file()
+    def change_config_file(self, ini_file=None):
+        if ini_file:
+            ConfReader.INI_FILE = ini_file
+        self.read_conf_file(self.config)
+        self.read_conf_file(self.config_dict)
 
-    def read_conf_file(self):
+    @staticmethod
+    def read_conf_file(config):
         """
         Read the specified INI_FILE. This clears every loaded configuration.
         :raises:
@@ -116,12 +118,12 @@ class ConfReader(metaclass=Singleton):
             raise FileNotFoundError()
 
         with open(ConfReader.INI_FILE) as _file_:
-            self.config.clear()
-            self.config.read_file(_file_)
+            config.clear()
+            config.read_file(_file_)
 
         # Store the reader modification time to automatic reload
         ConfReader.__INI_FILE_TIME__ = os.path.getmtime(ConfReader.INI_FILE)
-        logger.debug('Ini files successfully loaded')
+        logger.debug('Ini file successfully loaded')
 
     def __initialize_dict_cache__(self):
         """
@@ -177,7 +179,7 @@ class ConfReader(metaclass=Singleton):
             return self.cache.get(section)
 
         # Collect all configurations
-        configs_list = self.config.items(section, raw=True)
+        configs_list = self.config_dict.items(section, raw=True)
         configs = dict()
 
         # Parse configurations to dictionary

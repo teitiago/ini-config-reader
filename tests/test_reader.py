@@ -56,6 +56,18 @@ class ReadeActionsTC(ReaderTestCase):
         self.assertTrue(isinstance(config, list))
         self.assertEqual(config, [1, 2, 3, 4, 5])
 
+    def test_get_section_dict(self):
+        """
+        Validates if the complete section can be collected ina python format
+        """
+        section_1 = ConfReader.get_section_dict('SECTION_1')
+        self.assertTrue(isinstance(section_1, dict))
+
+        section_2 = ConfReader.get_section_dict('SECTION_2')
+        self.assertTrue(isinstance(section_2, dict))
+        self.assertTrue(isinstance(section_2.get('config_6'), dict))
+        self.assertTrue(isinstance(section_2.get('config_5'), list))
+
     @patch('conf_reader.reader.os.path.getmtime')
     def test_file_reload(self, get_time):
         """
